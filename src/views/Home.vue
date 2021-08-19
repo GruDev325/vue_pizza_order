@@ -7,7 +7,7 @@
         Purchase
       </button>
     </div>
-    <Search v-model:value="state.search" @clear-search="clearSearch" />
+    <Search v-model:selectedSize="state.selectedSize" @select-size="selectSize" />
     <Ingredients
       v-bind:ingredients="state.ingredients"
       @remove-ingredient="removeIngredient"
@@ -55,7 +55,7 @@ export default {
     const store = useStore();
     /*eslint-disable */
     const state = reactive({
-      search: "",
+      selectedSize: "",
       ingredients: [],
       ingredientsPreview: computed(() => store.state.ingredientsPreview),
       recipes: [],
@@ -74,7 +74,9 @@ export default {
     // let timer = '';
     watchEffect(() => {
       // getIngredients();
-      // if (state.search) getIngredients();
+      if (state.selectedSize) {
+        console.log('[[[[[[[[[[]]]]]]]]]]')
+      };
       // else state.ingredientsPreview = [];
       state.totalPrice = 0;
       if (state.ingredients.length > 0) {
@@ -89,6 +91,10 @@ export default {
       if (!state.ingredients.some((i) => i.id === ingredient.id)) {
         state.ingredients.push(ingredient);
       }
+    };
+
+    const selectSize = (size) => {
+      state.selectedSize = size;
     };
 
     const removeIngredient = (ingredientId) => {
@@ -109,8 +115,7 @@ export default {
     };
 
     const save = () => {
-      // state.orders.
-      console.log(state.ingredients);
+      // state.orders.      
       store.commit('addOrder', {
         id: 1,
         title: 'asdfadf',
@@ -124,6 +129,7 @@ export default {
       addIngredient,
       removeIngredient,
       clearSearch,
+      selectSize,
       previewRecipe,
       closeRecipe,
       save,

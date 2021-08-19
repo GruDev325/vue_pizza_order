@@ -1,5 +1,7 @@
 <template>
-  <div id="nav"><router-link :to="{ name: 'home'}">Buy a new pizza !</router-link></div>
+  <div id="nav">
+    <router-link :to="{ name: 'home' }">Buy a new pizza !</router-link>
+  </div>
   <div class="container text-left">
     <div class="row" v-if="state.orders.length">
       <div
@@ -10,7 +12,9 @@
         <div class="card" :style="{ height: '100%' }">
           <img :src="order.image" class="card-img-top" :alt="order.title" />
           <div class="card-body">
-            <h5 class="card-title">{{ order.title }} | Total Price: {{ order.totalPrice }}</h5>
+            <h5 class="card-title">
+              {{ order.title }} | Total Price: {{ order.totalPrice }}
+            </h5>
           </div>
           <div class="card-body">
             <!-- <button
@@ -22,12 +26,14 @@
             </button> -->
             <router-link
               class="btn btn-link"
-              :to="{ name: 'home_edit', params: { id: order.id }}"
-              >Edit</router-link>
+              :to="{ name: 'home_edit', params: { id: order.id } }"
+              >Edit</router-link
+            >
             <router-link
               class="btn btn-link"
-              :to="{ name: 'home_edit', params: { id: order.id }}"
-              >Open</router-link>
+              :to="{ name: 'home_edit', params: { id: order.id } }"
+              >Open</router-link
+            >
           </div>
         </div>
       </div>
@@ -36,25 +42,25 @@
 </template>
 
 <script>
-  /*eslint-disable */
-  
+/*eslint-disable */
+
 import { computed, reactive, watchEffect } from "vue";
 import { useStore } from "vuex";
 export default {
   name: "Orders",
-  components: {  },
+  components: {},
   setup() {
     const store = useStore();
     const state = reactive({
       orders: computed(() => store.state.orders),
     });
+    
     console.log(state.orders);
     // let timer = '';
-    watchEffect(() => {
-    });
+    watchEffect(() => {});
 
     return {
-      state
+      state,
     };
   },
 };
