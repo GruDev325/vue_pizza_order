@@ -3,11 +3,28 @@
     <h1>Pizza</h1>
     <h4 class="mb-3">Pizza Total Price: ${{ state.totalPrice }}</h4>
     <div class="mb-3">
-      <button type="button" class="btn btn-primary" @click="save">
+      <button type="button" class="btn btn-primary" @click="openModal">
         Purchase
       </button>
+      <Modal v-if="!!state.showModal" title="Customer Info" @close="closeModal" @on-Submit="onSubmit">
+        <div class="form-group">
+          <label for="usr">Name:</label>
+          <input type="text" class="form-control" id="usr" />
+        </div>
+        <div class="form-group">
+          <label for="addr">Address:</label>
+          <input type="text" class="form-control" id="addr" />
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone:</label>
+          <input type="text" class="form-control" id="phone" />
+        </div>
+      </Modal>
     </div>
-    <Search v-model:selectedSize="state.selectedSize" @select-size="selectSize" />
+    <Pizza
+      v-model:selectedSize="state.selectedSize"
+      @select-size="selectSize"
+    />
     <Ingredients
       v-bind:ingredients="state.ingredients"
       @remove-ingredient="removeIngredient"
@@ -16,18 +33,14 @@
     <IngredientsPreview
       :ingredients-preview="state.ingredientsPreview"
       @add-ingredient="addIngredient"
-    />
-    <Recipes :recipes="state.recipes" @preview-recipe="previewRecipe" />
-    <Modal v-if="!!state.recipe" :title="state.recipe?.title" @close="closeRecipe">
-      <RecipeContent :orderId="String(state.recipe?.id)" :apiKey="state.apiKey" />
-    </Modal>
+    />    
   </div>
 </template>
 
 <script>
 /*eslint-disable */
 
-import Search from "@/components/Search.vue";
+import Pizza from "@/components/Pizza.vue";
 import Ingredients from "@/components/Ingredients";
 import IngredientsPreview from "@/components/IngredientsPreview";
 import Modal from "@/components/Modal";
@@ -35,13 +48,13 @@ import Recipes from "@/components/Recipes";
 import RecipeContent from "@/components/RecipeContent";
 import { computed, reactive, watchEffect } from "vue";
 import { useStore } from "vuex";
-import { useRouter, useRoute } from 'vue-router'
-
+import { useRouter, useRoute } from "vue-router";
+import image from "../assets/pizza.jpg";
 
 export default {
   name: "Home",
   components: {
-    Search,
+    Pizza,
     Ingredients,
     IngredientsPreview,
     Modal,
@@ -55,19 +68,25 @@ export default {
     const store = useStore();
     /*eslint-disable */
     const state = reactive({
-      selectedSize: "",
+      selectedSize: 0,
       ingredients: [],
       ingredientsPreview: computed(() => store.state.ingredientsPreview),
       recipes: [],
       recipe: null,
       totalPrice: 0,
+      type: "",
+      showModal: false,
     });
 
     if (typeof orderId != "undefined") {
       if (orderId >= store.state.orders.length) {
         router.push("/home");
       } else {
-        state.ingredients = computed(() => store.state.orders[orderId].ingredients ? store.state.orders[orderId].ingredients : [])
+        state.ingredients = computed(() =>
+          store.state.orders[orderId].ingredients
+            ? store.state.orders[orderId].ingredients
+            : []
+        );
       }
     }
 
@@ -75,16 +94,33 @@ export default {
     watchEffect(() => {
       // getIngredients();
       if (state.selectedSize) {
-        console.log('[[[[[[[[[[]]]]]]]]]]')
-      };
+        console.log(state.selectedSize);
+      }
       // else state.ingredientsPreview = [];
       state.totalPrice = 0;
       if (state.ingredients.length > 0) {
         state.ingredients.map((item) => {
           state.totalPrice += item.price;
         });
-        console.log(state.totalPrice);
       }
+      switch (state.selectedSize) {
+        case 5:
+          state.type = "Small Pizza";
+          break;
+        case 10:
+          state.type = "Medium Pizza";
+          break;
+        case 15:
+          state.type = "Large Pizza";
+          break;
+        case 20:
+          state.type = "Extra large Pizza";
+          break;
+
+        default:
+      }
+
+      state.totalPrice += state.selectedSize;
     });
 
     const addIngredient = (ingredient) => {
@@ -98,11 +134,13 @@ export default {
     };
 
     const removeIngredient = (ingredientId) => {
-      state.ingredients = state.ingredients.filter((i) => i.id !== ingredientId);
+      state.ingredients = state.ingredients.filter(
+        (i) => i.id !== ingredientId
+      );
     };
 
-    const clearSearch = () => {
-      state.search = "";
+    const clearPizza = () => {
+      state.pizza = "";
       state.ingredientsPreview = [];
     };
 
@@ -110,17 +148,22 @@ export default {
       state.recipe = recipe;
     };
 
-    const closeRecipe = () => {
-      state.recipe = null;
+    const openModal = () => {
+      state.showModal = true;
     };
 
-    const save = () => {
-      // state.orders.      
-      store.commit('addOrder', {
+    const closeModal = () => {      
+      state.showModal = false;      
+    };
+
+    const onSubmit = () => {
+      store.commit("addOrder", {
         id: 1,
-        title: 'asdfadf',
+        title: state.type,
+        image: image,
         totalPrice: state.totalPrice,
-      })
+      });
+      state.showModal = false;
       router.push("/");
     };
 
@@ -128,11 +171,12 @@ export default {
       state,
       addIngredient,
       removeIngredient,
-      clearSearch,
+      clearPizza,
       selectSize,
       previewRecipe,
-      closeRecipe,
-      save,
+      closeModal,
+      openModal,
+      onSubmit,
     };
   },
 };

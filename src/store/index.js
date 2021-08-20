@@ -8,31 +8,31 @@ const state = {
       id: 0,
       image: image,
       name: "Mushrooms",
-      price: 5
+      price: 1
     },
     {
       id: 1,
       image: image,
       name: "Olives",
-      price: 5
+      price: 1
     },
     {
       id: 2,
       image: image,
       name: "Tomato",
-      price: 5
+      price: 0
     },
     {
       id: 3,
       image: image,
       name: "Tona",
-      price: 5
+      price: 3
     },
     {
       id: 4,
       image: image,
       name: "Pineapple",
-      price: 5
+      price: 3
     },
     {
       id: 5,
@@ -44,25 +44,25 @@ const state = {
       id: 6,
       image: image,
       name: "Pepperoni",
-      price: 5
+      price: 2
     },
     {
       id: 7,
       image: image,
       name: "Bacon",
-      price: 5
+      price: 1
     },
     {
       id: 8,
       image: image,
       name: "Onion",
-      price: 5
+      price: 0
     },
     {
       id: 9,
       image: image,
       name: "Mozzarella",
-      price: 5
+      price: 3
     }
   ],
   orders: [{
@@ -78,6 +78,12 @@ const state = {
       },
     ],
     totalPrice: 0
+  }],
+  customers: [{
+    id: 0,
+    name: '',
+    addr: '',
+    phone: ''
   }]
 };
 
@@ -90,6 +96,9 @@ const mutations = {
   },
   addOrder: (state, payload) => {
     state.orders.push(payload);
+  },
+  addCustomer: (state, payload) => {
+    state.customers.push(payload);
   },
 };
 

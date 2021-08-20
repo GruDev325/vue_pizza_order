@@ -13,27 +13,18 @@
           <img :src="order.image" class="card-img-top" :alt="order.title" />
           <div class="card-body">
             <h5 class="card-title">
-              {{ order.title }} | Total Price: {{ order.totalPrice }}
+              {{ order.title }}
+            </h5>           
+            <h5 class="card-title">
+              Total Price: {{ order.totalPrice }}
             </h5>
           </div>
-          <div class="card-body">
-            <!-- <button
-              type="button"
-              class="btn btn-link"
-              @click="$emit('edit-order', order)"
-            >
-              Edit
-            </button> -->
+          <div class="card-body">            
             <router-link
-              class="btn btn-link"
+              class="btn btn-info"
               :to="{ name: 'home_edit', params: { id: order.id } }"
               >Edit</router-link
-            >
-            <router-link
-              class="btn btn-link"
-              :to="{ name: 'home_edit', params: { id: order.id } }"
-              >Open</router-link
-            >
+            >                        
           </div>
         </div>
       </div>

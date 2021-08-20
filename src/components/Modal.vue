@@ -1,7 +1,7 @@
 <template>
   <teleport to="body">
-    <div class="modal" tabindex="-1">
-      <div class="modal-dialog">
+    <div class="modal" id="customer_modal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">{{ title }}</h5>
@@ -18,6 +18,9 @@
           <div class="modal-body">
             <slot></slot>
           </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" @click="$emit('on-Submit', submit)">Confirm</button>
+          </div>
         </div>
       </div>
     </div>
@@ -30,7 +33,8 @@ export default {
     visible: Boolean,
     title: String,
   },
-  emits: ['close'],
+  emits: ["close"],
+  emit: ["submit"],
 };
 </script>
 
@@ -40,11 +44,9 @@ export default {
   background-color: rgba(0, 0, 0, 0.5);
 }
 
-.modal-dialog {
-  width: calc(100% - 40px);
-  max-width: initial;
-  height: calc(100vh - 40px);
-  margin: 20px;
+.modal-dialog { 
+  max-width: initial; 
+  margin: 50px;
 }
 
 .modal-content {

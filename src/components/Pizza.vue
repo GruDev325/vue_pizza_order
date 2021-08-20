@@ -6,6 +6,7 @@
         v-for="size in state.sizes"
         v-bind:key="size"
       >
+      <h4 class="mb-3">Price: ${{ size }}</h4>
         <li>
           <label
             :class="size === selectedSize ? 'checked' : ''"
@@ -21,14 +22,14 @@
 
 <script>
 export default {
-  name: "Search",
+  name: "Pizza",
   props: {
     selectedSize: String,
   },
   setup() {
     const state = {
-      sizes: ["Small", "Medium", "Large", "Extra large"],
-      price: ["5", "10", "15", "20"],
+      sizes: [5, 10, 15, 20],
+      // price: ["5", "10", "15", "20"],
     };
     return {
       state,
