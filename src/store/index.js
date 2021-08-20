@@ -65,26 +65,12 @@ const state = {
       price: 3
     }
   ],
-  orders: [{
-    id: 0,
-    title: 'Yammy Pizza',
-    image: image,
-    ingredients: [
-      {
-        id: 1,
-        image: image,
-        name: "Mushrooms",
-        price: 5
-      },
-    ],
-    totalPrice: 0
-  }],
-  customers: [{
-    id: 0,
+  orders: [],
+  customer: {
     name: '',
     addr: '',
     phone: ''
-  }]
+  }
 };
 
 const mutations = {
@@ -97,8 +83,12 @@ const mutations = {
   addOrder: (state, payload) => {
     state.orders.push(payload);
   },
+  updateOrder: (state, payload) => {
+    state.orders[payload.id] = payload;
+  },
   addCustomer: (state, payload) => {
-    state.customers.push(payload);
+    console.log(payload);
+    state.customer=payload;
   },
 };
 

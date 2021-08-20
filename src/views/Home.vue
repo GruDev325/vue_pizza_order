@@ -3,21 +3,46 @@
     <h1>Pizza</h1>
     <h4 class="mb-3">Pizza Total Price: ${{ state.totalPrice }}</h4>
     <div class="mb-3">
-      <button type="button" class="btn btn-primary" @click="openModal">
+      <button
+        type="button"
+        class="btn btn-primary"
+        @click="onSubmit('purchase')"
+      >
         Purchase
       </button>
-      <Modal v-if="!!state.showModal" title="Customer Info" @close="closeModal" @on-Submit="onSubmit">
+      <hr />
+      <Modal
+        v-if="!!state.showModal"
+        title="Customer Info"
+        @close="closeModal"
+        @on-Submit="onSubmit"
+      >
         <div class="form-group">
           <label for="usr">Name:</label>
-          <input type="text" class="form-control" id="usr" />
+          <input
+            type="text"
+            class="form-control"
+            id="usr"
+            v-model="state.customer.name"
+          />
         </div>
         <div class="form-group">
           <label for="addr">Address:</label>
-          <input type="text" class="form-control" id="addr" />
+          <input
+            type="text"
+            class="form-control"
+            id="addr"
+            v-model="state.customer.addr"
+          />
         </div>
         <div class="form-group">
           <label for="phone">Phone:</label>
-          <input type="text" class="form-control" id="phone" />
+          <input
+            type="text"
+            class="form-control"
+            id="phone"
+            v-model="state.customer.phone"
+          />
         </div>
       </Modal>
     </div>
@@ -25,6 +50,9 @@
       v-model:selectedSize="state.selectedSize"
       @select-size="selectSize"
     />
+    <hr />
+    <h2>Toppings</h2>
+    <hr />
     <Ingredients
       v-bind:ingredients="state.ingredients"
       @remove-ingredient="removeIngredient"
@@ -33,7 +61,7 @@
     <IngredientsPreview
       :ingredients-preview="state.ingredientsPreview"
       @add-ingredient="addIngredient"
-    />    
+    />
   </div>
 </template>
 
@@ -46,7 +74,7 @@ import IngredientsPreview from "@/components/IngredientsPreview";
 import Modal from "@/components/Modal";
 import Recipes from "@/components/Recipes";
 import RecipeContent from "@/components/RecipeContent";
-import { computed, reactive, watchEffect } from "vue";
+import { getCurrentInstance, computed, reactive, watchEffect } from "vue";
 import { useStore } from "vuex";
 import { useRouter, useRoute } from "vue-router";
 import image from "../assets/pizza.jpg";
@@ -66,11 +94,16 @@ export default {
     const route = useRoute();
     const orderId = route.params.id;
     const store = useStore();
+    const app = getCurrentInstance();
+    const properties = app.appContext.config.globalProperties;
+    const toast = properties.$toast;
     /*eslint-disable */
     const state = reactive({
       selectedSize: 0,
       ingredients: [],
+      orders: computed(() => store.state.orders),
       ingredientsPreview: computed(() => store.state.ingredientsPreview),
+      customer: computed(() => store.state.customer),
       recipes: [],
       recipe: null,
       totalPrice: 0,
@@ -82,11 +115,12 @@ export default {
       if (orderId >= store.state.orders.length) {
         router.push("/home");
       } else {
-        state.ingredients = computed(() =>
-          store.state.orders[orderId].ingredients
-            ? store.state.orders[orderId].ingredients
-            : []
-        );
+        state.ingredients = state.orders.length
+          ? state.orders[orderId].ingredients
+          : [];
+        state.selectedSize = state.orders.length
+          ? state.orders[orderId].selectedSize
+          : 0;
       }
     }
 
@@ -122,11 +156,60 @@ export default {
 
       state.totalPrice += state.selectedSize;
     });
-
+    let counter = 0;
     const addIngredient = (ingredient) => {
-      if (!state.ingredients.some((i) => i.id === ingredient.id)) {
-        state.ingredients.push(ingredient);
+      //  Topping Counts
+      if (state.ingredients.length > 6) {
+        toast.warning(
+          `You can't choose anymore. You have already choosed 6 toppings.`,
+          {
+            // override the global option
+            position: "bottom",
+          }
+        );
+        return;
       }
+      //  Check topping is already choosed.
+      if (state.ingredients.some((i) => i.id === ingredient.id)) {
+        toast.warning(`You have already choosed this topping.`, {
+          // override the global option
+          position: "bottom",
+        });
+        return;
+      }
+
+      if (
+        state.ingredients.some(
+          (i) =>
+            (i.name === "Bacon" && ingredient.name == "Mozzarella") ||
+            (i.name === "Mozzarella" && ingredient.name == "Bacon")
+        )
+      ) {
+        toast.warning(`You can't choose  ${ingredient.name}.`, {
+          // override the global option
+          position: "bottom",
+        });
+        return;
+      }
+
+      counter += 1;
+      if (counter == 2) {
+        counter = 0;
+        toast.info(`You earned a Olive topping as a free.`, {
+          // override the global option
+          position: "bottom",
+        });
+        state.ingredients.push({
+          id: 1,
+          image: image,
+          name: "Olives",
+          price: 1,
+        });
+      }
+      state.ingredients.push(ingredient);
+      toast.success("Order placed.", {
+        position: "bottom",
+      });
     };
 
     const selectSize = (size) => {
@@ -152,19 +235,40 @@ export default {
       state.showModal = true;
     };
 
-    const closeModal = () => {      
-      state.showModal = false;      
+    const closeModal = () => {
+      state.showModal = false;
     };
 
-    const onSubmit = () => {
-      store.commit("addOrder", {
-        id: 1,
-        title: state.type,
-        image: image,
-        totalPrice: state.totalPrice,
-      });
-      state.showModal = false;
-      router.push("/");
+    const onSubmit = (action) => {
+      if (state.customer.name) {
+        state.showModal = true;
+        if (action != "purchase") {
+          store.commit("addCustomer", state.customer);
+        }
+        if (typeof orderId != "undefined") {
+          store.commit("updateOrder", {
+            id: orderId,
+            title: state.type,
+            image: image,
+            selectedSize: state.selectedSize,
+            ingredients: state.ingredients,
+            totalPrice: state.totalPrice,
+          });
+        } else {
+          store.commit("addOrder", {
+            id: state.orders.length,
+            title: state.type,
+            image: image,
+            selectedSize: state.selectedSize,
+            ingredients: state.ingredients,
+            totalPrice: state.totalPrice,
+          });
+        }
+
+        router.push("/");
+      } else {
+        state.showModal = true;
+      }
     };
 
     return {
@@ -178,6 +282,9 @@ export default {
       openModal,
       onSubmit,
     };
+  },
+  mounted() {
+    this.toast = this.$toast;
   },
 };
 </script>
